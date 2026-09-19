@@ -1,0 +1,75 @@
+{
+  "name": "dsh-with-chatgpt",
+  "version": "0.1.0",
+  "description": "ChatGPT plans and reviews while DeepSeek Harness executes in the local workspace.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dufangzhao/dsh-with-chatgpt.git"
+  },
+  "homepage": "https://github.com/dufangzhao/dsh-with-chatgpt#readme",
+  "bugs": {
+    "url": "https://github.com/dufangzhao/dsh-with-chatgpt/issues"
+  },
+  "main": "./lib/index.mjs",
+  "exports": {
+    ".": "./lib/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "d2c": "./bin/d2c.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "lib",
+    "skill",
+    "cordis.patch.yml",
+    "compatibility.json",
+    "LICENSE",
+    "NOTICE.md",
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "pnpm build",
+    "dev": "tsx src/cli/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "pack:check": "npm pack --dry-run"
+  },
+  "packageManager": "pnpm@11.24.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "commander": "^14.0.0",
+    "express": "^5.1.0",
+    "ignore": "^7.0.5",
+    "zod": "^3.25.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.2",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
