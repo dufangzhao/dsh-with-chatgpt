@@ -38,10 +38,12 @@ DSH 目前仍是预发布接口。升级到 `compatibility.json` 范围之外时
 ## 安装
 
 ```powershell
-pnpm install
-pnpm build
-dsh plugin --profile web add file:C:/你的绝对路径/dsh-with-chatgpt
+dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.1.0"
 ```
+
+仓库已经包含编译好的 `dist/`，通过 GitHub 安装时不需要在用户电脑上执行构建
+脚本。仓库为私有状态时，Git 必须已登录有权访问该仓库的 GitHub 账户。安装后
+需要重启 DSH Profile。
 
 验证：
 
@@ -49,6 +51,15 @@ dsh plugin --profile web add file:C:/你的绝对路径/dsh-with-chatgpt
 dsh plugin --profile web list
 dsh --profile web --dump-config
 dsh --profile web --no-open --port 0
+```
+
+如果要参与本地开发：
+
+```powershell
+pnpm install
+pnpm build
+pnpm test
+dsh plugin --profile web add file:C:/你的绝对路径/dsh-with-chatgpt
 ```
 
 然后在 DSH 中说：

@@ -43,10 +43,12 @@ when upgrading outside the range in `compatibility.json`.
 ## Install
 
 ```powershell
-pnpm install
-pnpm build
-dsh plugin --profile web add file:C:/absolute/path/to/dsh-with-chatgpt
+dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.1.0"
 ```
+
+The repository includes the compiled `dist/` runtime, so a GitHub install does
+not run package build scripts. For a private repository, Git must already be
+authenticated to GitHub. Restart the DSH profile after installation.
 
 The package bundle inserts the `dsh-with-chatgpt` Cordis plugin. The companion
 BrowserSkill plugin must already be installed if DSH should automate ChatGPT web.
@@ -57,6 +59,15 @@ Verify:
 dsh plugin --profile web list
 dsh --profile web --dump-config
 dsh --profile web --no-open --port 0
+```
+
+For local development:
+
+```powershell
+pnpm install
+pnpm build
+pnpm test
+dsh plugin --profile web add file:C:/absolute/path/to/dsh-with-chatgpt
 ```
 
 Inside DSH, ask:
