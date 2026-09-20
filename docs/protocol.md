@@ -1,6 +1,7 @@
 # C2C Agent Protocol
 
-Control plane: Computer Use (tiny structured messages typed into the ChatGPT UI).
+Control plane: DSH Browser Use with the official Playwright MCP provider (tiny
+structured messages typed into the ChatGPT UI through DOM/accessibility refs).
 Data plane: MCP (ChatGPT pulls files, diffs, search results itself).
 
 Never mix the two: control messages carry state, never content.

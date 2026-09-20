@@ -19,7 +19,7 @@ Cloudflare 隧道 → 本地 D2C Bridge → 当前项目代码（只读）
 
 DSH（唯一执行器）→ 修改文件 / 运行命令 / 测试 / Git
        ├─ dsh_chatgpt：受约束的桥接管理工具
-       └─ BrowserSkill：操作 ChatGPT 网页
+       └─ DSH Browser Use + Playwright MCP：操作 ChatGPT 网页
 ```
 
 并不是把项目部署到 Cloudflare。Cloudflare 只转发到本机 Bridge；源代码仍在
@@ -27,9 +27,10 @@ DSH（唯一执行器）→ 修改文件 / 运行命令 / 测试 / Git
 
 ## 已验证环境
 
-- DSH `0.1.5-rc.2`
+- DSH `0.1.6-alpha.2`
 - Node.js `22.19.x` 或 `24.x`
-- `@wxg-prc-cpg/browser-skill-dsh-plugin` `0.1.2`
+- `@deepseek-ai/dsh-browser-use` `0.1.6-alpha.2`
+- `@deepseek-ai/dsh-experimental-browser-use-playwright-mcp` `0.1.6-alpha.2`
 - cloudflared `2026.9.1`
 
 DSH 目前仍是预发布接口。升级到 `compatibility.json` 范围之外时，应重新做
@@ -38,12 +39,35 @@ DSH 目前仍是预发布接口。升级到 `compatibility.json` 范围之外时
 ## 安装
 
 ```powershell
-dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.1.0"
+dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.2.0"
 ```
 
 仓库已经包含编译好的 `dist/`，通过 GitHub 安装时不需要在用户电脑上执行构建
 脚本。仓库为私有状态时，Git 必须已登录有权访问该仓库的 GitHub 账户。安装后
 需要重启 DSH Profile。
+
+ChatGPT 网页自动化改用 DSH 0.1.6 官方 Browser Use，不再依赖腾讯
+BrowserSkill。Browser Use 当前仍是实验功能，需要在目标 Profile 安装并挂载：
+
+```powershell
+dsh plugin --profile web add `
+  @deepseek-ai/dsh-browser-use@0.1.6-alpha.2 `
+  @deepseek-ai/dsh-experimental-browser-use-playwright-mcp@0.1.6-alpha.2
+```
+
+```yaml
+- insert:
+    - id: browser-use
+      name: '@deepseek-ai/dsh-browser-use'
+    - id: browser-use-playwright-mcp
+      name: '@deepseek-ai/dsh-experimental-browser-use-playwright-mcp'
+      config:
+        mode: launch
+        headless: false
+```
+
+修改后重启 DSH Profile。工具名称为 `mcp__playwright-mcp__*`。Computer Use
+可以继续保留给原生桌面任务，但本插件操作 ChatGPT 时只使用 Browser Use。
 
 验证：
 
@@ -71,7 +95,7 @@ dsh plugin --profile web add file:C:/你的绝对路径/dsh-with-chatgpt
 插件会加载内置 Skill，引导 DSH：
 
 1. 检查 Bridge 与 Cloudflare 连接；
-2. 通过 BrowserSkill 在 ChatGPT 中创建 OAuth 连接器；
+2. 通过 DSH Browser Use 在 ChatGPT 中创建 OAuth 连接器；
 3. 用一次性配对码授权；
 4. 按 `INIT → PLAN → EXECUTING → EXECUTED → REVIEW` 循环协作；
 5. DSH 始终保留修改、测试和交付权限。

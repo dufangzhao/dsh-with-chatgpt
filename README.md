@@ -23,7 +23,7 @@ Cloudflare tunnel -> local D2C bridge -> current workspace (read-only)
 DSH agent (sole executor) -> edits / commands / tests / Git
           |
           +-> dsh_chatgpt (constrained bridge lifecycle tool)
-          +-> BrowserSkill (ChatGPT web interaction)
+          +-> DSH Browser Use + Playwright MCP (ChatGPT web interaction)
 ```
 
 ChatGPT never receives shell or write tools. The `dsh_chatgpt` tool does not
@@ -32,9 +32,10 @@ DSH session directory.
 
 ## Tested environment
 
-- DSH `0.1.5-rc.2`
+- DSH `0.1.6-alpha.2`
 - Node.js `22.19.x` or `24.x`
-- `@wxg-prc-cpg/browser-skill-dsh-plugin` `0.1.2`
+- `@deepseek-ai/dsh-browser-use` `0.1.6-alpha.2`
+- `@deepseek-ai/dsh-experimental-browser-use-playwright-mcp` `0.1.6-alpha.2`
 - cloudflared `2026.9.1`
 
 DSH is currently prerelease software. Re-run the startup and tool-call checks
@@ -43,15 +44,41 @@ when upgrading outside the range in `compatibility.json`.
 ## Install
 
 ```powershell
-dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.1.0"
+dsh plugin --profile web add "github:dufangzhao/dsh-with-chatgpt#v0.2.0"
 ```
 
 The repository includes the compiled `dist/` runtime, so a GitHub install does
 not run package build scripts. For a private repository, Git must already be
 authenticated to GitHub. Restart the DSH profile after installation.
 
-The package bundle inserts the `dsh-with-chatgpt` Cordis plugin. The companion
-BrowserSkill plugin must already be installed if DSH should automate ChatGPT web.
+The package bundle inserts the `dsh-with-chatgpt` Cordis plugin. ChatGPT web
+automation uses DSH's official Browser Use service and Playwright MCP provider;
+Tencent BrowserSkill is not required.
+
+Browser Use is currently experimental and must be installed and mounted in the
+DSH profile. Use visible launch mode so login, CAPTCHA, passkey, consent, and 2FA
+can be handed to the user:
+
+```powershell
+dsh plugin --profile web add `
+  @deepseek-ai/dsh-browser-use@0.1.6-alpha.2 `
+  @deepseek-ai/dsh-experimental-browser-use-playwright-mcp@0.1.6-alpha.2
+```
+
+```yaml
+- insert:
+    - id: browser-use
+      name: '@deepseek-ai/dsh-browser-use'
+    - id: browser-use-playwright-mcp
+      name: '@deepseek-ai/dsh-experimental-browser-use-playwright-mcp'
+      config:
+        mode: launch
+        headless: false
+```
+
+Restart the DSH profile after changing the provider. Browser Use tools appear as
+`mcp__playwright-mcp__*`. Computer Use may remain enabled for native desktop
+tasks, but this plugin intentionally uses Browser Use for ChatGPT.
 
 Verify:
 

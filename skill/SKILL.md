@@ -20,12 +20,51 @@ disconnect it, or run a task through the ChatGPT planning/review loop.
 - Never expose browser cookies or account tokens. The one-time pairing code is
   the only credential that may be entered into the connector authorization page.
 
-## Required companion skill
+## Required DSH browser runtime
 
-Use the `browser-skill` runtime skill and its `browser_*` tools for ChatGPT web
-pages. Keep one BrowserSkill session for the whole planning loop. If ChatGPT asks
-for login, CAPTCHA, passkey, or another human-only action, use
-`browser_assist(action=request-help)` and wait for the user.
+Use DSH's official Browser Use service with the Playwright MCP provider:
+
+- `@deepseek-ai/dsh-browser-use`
+- `@deepseek-ai/dsh-experimental-browser-use-playwright-mcp`
+- model-visible tools under `mcp__playwright-mcp__*`
+
+Do not use Tencent BrowserSkill (`browser_*`) for this workflow. Do not use
+Computer Use or screenshot-coordinate clicking for ChatGPT. Browser Use is the
+closest DSH equivalent to the upstream Codex in-app browser: it operates the DOM
+and accessibility tree and keeps browser state for the active DSH Session.
+
+The provider must use visible launch mode (`mode: launch`, `headless: false`) so
+the user can complete login, CAPTCHA, passkey, consent, or 2FA. For those
+human-only steps, tell the user one action to complete in the visible browser,
+wait for confirmation, then continue in the same DSH Session and tab.
+
+Browser operating contract:
+
+1. Use one DSH Session and one ChatGPT tab for the whole setup/planning loop.
+2. Start with `mcp__playwright-mcp__browser_tabs` to list or create/select the
+   tab. Reuse it; do not silently create a second ChatGPT tab.
+3. Navigate with `mcp__playwright-mcp__browser_navigate`.
+4. Inspect with `mcp__playwright-mcp__browser_snapshot`; prefer accessibility
+   refs over screenshots and coordinates.
+5. Act with `mcp__playwright-mcp__browser_click`,
+   `mcp__playwright-mcp__browser_type`,
+   `mcp__playwright-mcp__browser_fill_form`, and
+   `mcp__playwright-mcp__browser_press_key`. Refresh the snapshot after a
+   navigation or state-changing action and verify the expected postcondition.
+6. Wait with short `mcp__playwright-mcp__browser_wait_for` calls. A timeout or
+   a still-generating page is not permission to resend a control message or open
+   another chat.
+7. Do not call `mcp__playwright-mcp__browser_close` while the workflow is
+   active. Browser state is owned by the DSH Session and may disappear when that
+   Session or provider is destroyed, so durable recovery still comes from
+   `session_get` checkpoints.
+
+Use these direct ChatGPT URLs rather than hunting through menus:
+
+- Developer mode: `https://chatgpt.com/#settings/Security`
+- Connector manager: `https://chatgpt.com/plugins`
+- Create connector: `https://chatgpt.com/plugins#settings/Connectors?create-connector=true&redirectAfter=%2Fplugins`
+- A saved chat or Project collection URL returned by `session_get`
 
 ## Local bridge tool
 
@@ -54,12 +93,15 @@ sandbox configuration.
      need to be recreated.
    - `named`: stable hostname on a Cloudflare domain controlled by the user.
 3. Call `tunnel_choose`, then `setup`.
-4. Start or reuse one BrowserSkill session and open ChatGPT.
-5. Ensure ChatGPT developer mode is enabled. Navigate to the connector creation
-   page returned by current ChatGPT UI rather than assuming stale labels.
+4. In the current DSH Session, start or reuse the one Browser Use ChatGPT tab.
+5. Navigate directly to the Developer mode URL when it has not already been
+   remembered as enabled. Then navigate to the connector manager and create
+   connector URLs above. Use snapshots and accessibility refs, not screenshots.
 6. Create the connector with the exact `connectorName` and `mcpUrl` returned by
    `setup`; select OAuth authentication.
-7. On the bridge authorization page enter only the returned `pairingCode`.
+7. Click Connect / Authorize. Only when the bridge authorization page is visible,
+   call `pair` if a fresh code is needed and enter only the returned
+   `pairingCode`.
 8. Confirm the connector is enabled in ChatGPT, then call `doctor`. Do not begin
    a task loop unless the doctor result is healthy.
 9. Save the exact connector name with `session_set`.
@@ -75,6 +117,9 @@ old connector and creating a new one; do not keep retrying a dead URL.
   or the user explicitly starts over.
 - Before navigating, call `session_get`. Resume the saved URL and checkpoint when
   possible instead of silently starting a second planning thread.
+- Use the same Browser Use tab and `mcp__playwright-mcp__browser_navigate` for
+  saved chats and Project collections. Never match a Project by display name and
+  never upload repository files to ChatGPT Project sources.
 
 ## Planning and review protocol
 

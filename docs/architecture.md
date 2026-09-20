@@ -6,7 +6,7 @@
              │  Reason / Plan / Review   │
              └──────────┬──────────▲─────┘
                         │          │
-               MCP      │          │ Computer Use
+               MCP      │          │ DSH Browser Use
             Data Plane  │          │ Control Plane
                         ▼          │
              ┌─────────────────────┐
@@ -31,7 +31,10 @@
 ## Principles
 
 - **ChatGPT thinks. DSH works.** The bridge never re-implements a coding harness.
-- **Computer Use = control plane**: tiny `[C2C]` state messages (< 1 KB).
+- **DSH Browser Use = control plane**: the official Playwright MCP provider
+  types tiny `[C2C]` state messages (< 1 KB) through DOM/accessibility refs.
+- **Computer Use is separate**: it may remain enabled for native desktop tasks,
+  but this workflow does not use it for ChatGPT web automation.
 - **MCP = data plane**: ChatGPT pulls files/diffs/search results itself.
 - **Read-only by design**: no write/exec tools exist in V1 at all.
 - **Workspace is the security boundary**: one bridge = one workspace = one token audience.

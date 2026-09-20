@@ -2,16 +2,19 @@
   "schemaVersion": 1,
   "plugin": "dsh-with-chatgpt",
   "tested": {
-    "dsh": ["0.1.5-rc.2"],
+    "dsh": ["0.1.6-alpha.2"],
     "node": ["22.19.x", "24.x"]
   },
   "requires": {
-    "dsh": ">=0.1.5-rc.2 <0.1.6",
-    "browserPlugin": "@wxg-prc-cpg/browser-skill-dsh-plugin >=0.1.2",
+    "dsh": "0.1.6-alpha.2",
+    "browserUseService": "@deepseek-ai/dsh-browser-use 0.1.6-alpha.2",
+    "browserUseProvider": "@deepseek-ai/dsh-experimental-browser-use-playwright-mcp 0.1.6-alpha.2",
     "cloudflared": ">=2026.9.1"
   },
   "notes": [
     "DSH APIs are prerelease; versions outside the tested range require a fresh startup and tool-call verification.",
-    "The browser plugin is required only for ChatGPT web setup and planning-loop automation."
+    "The official DSH Browser Use Playwright provider must be mounted in visible launch mode for login, CAPTCHA, and 2FA handoff.",
+    "Tencent BrowserSkill is no longer required or used by this plugin.",
+    "DSH Computer Use may remain enabled for other desktop tasks, but this plugin uses Browser Use for ChatGPT web automation."
   ]
 }
